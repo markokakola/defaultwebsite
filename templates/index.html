@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обыкновенный Сайт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background: linear-gradient(135deg, #7341ff, #daa2ff);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            background-image: linear-gradient(
+                -225deg,
+                #231557 0%,
+                #44107a 29%,
+                #ff1361 67%,
+                #ff28f4 100%
+            );
+            background-size: auto auto;
+            background-clip: border-box;
+            background-size: 200% auto;
+            color: #fff;
+            background-clip: text;
+            text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textclip 2s linear infinite;
+            display: inline-block;
+            font-size: 70px;
+        }
+
+        @keyframes textclip {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        button {
+            padding: 12px 25px;
+            margin: 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: #cc5fff;
+            border: none;
+            color: white;
+            border-radius: 25px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        p {
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            color: black;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .popup button {
+            background-color: #cc5fff;
+            color: white;
+            width: 100%;
+        }
+
+        .navbar {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+
+        .navbar a {
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .navbar a:hover {
+            background-color: #cc5fff;
+            border-radius: 5px;
+        }
+
+        .profile-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: white;
+            cursor: pointer;
+            display: none;
+            position: absolute;
+            top: 20px;
+            right: 10px;
+            overflow: hidden;
+        }
+
+        /* Позиции кнопок логина и регистрации */
+        #loginButton, #registerButton {
+            position: absolute;
+            top: 5px;
+            right: 60px;
+        }
+
+        #registerButton {
+            top: 5px;
+            right: 180px;
+        }
+
+        .popup p {
+            font-size: 1rem; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Добро пожаловать</h1>
+
+    <button id="loginButton">Войти</button>
+    <button id="registerButton">Зарегистрироваться</button>
+    <button id="messageButton">Получить сообщение</button>
+
+    <p id="message"></p>
+
+    <div id="loginPopup" class="popup">
+        <h2>Вход</h2>
+        <input type="text" id="loginUsername" placeholder="Никнейм">
+        <input type="password" id="loginPassword" placeholder="Пароль">
+        <p id="loginError" style="color: red;"></p>
+        <button onclick="login()">Войти</button>
+        <button onclick="closePopup('loginPopup')">Закрыть</button>
+    </div>
+
+    <div id="registerPopup" class="popup">
+        <h2>Регистрация</h2>
+        <input type="text" id="registerUsername" placeholder="Никнейм">
+        <input type="password" id="registerPassword" placeholder="Пароль">
+        <input type="text" id="registerEmail" placeholder="Электронная почта">
+        <p id="registerError" style="color: red;"></p>
+        <button onclick="register()">Зарегистрироваться</button>
+        <button onclick="closePopup('registerPopup')">Закрыть</button>
+    </div>
+
+    <div id="profileIcon" class="profile-icon" onclick="toggleNavbar()">
+        <img id="profileImage" src="" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%;">
+    </div>
+
+    <div id="navbar" class="navbar">
+        <a href="#" onclick="logout()">Выйти</a>
+    </div>
+
+    <script>
+        let isLoggedIn = false; // Значение вхождения пользователя
+        document.getElementById('messageButton').addEventListener('click', function () {
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('message').textContent = data.message;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        const profilePictures = [
+            'https://staticdelivery.nexusmods.com/mods/5848/images/thumbnails/149/149-1705193879-1560048888.png',
+            'https://art.kartinkof.club/uploads/posts/2023-06/1685855770_art-kartinkof-club-p-sakuya-izaei-art-40.jpg',
+            'https://avatars.mds.yandex.net/i?id=8bb35afd0c84d4335ff22601ceb754fb_l-6274953-images-thumbs&n=13',
+            'https://i.pinimg.com/236x/2d/ad/6b/2dad6b022b7af861a53b9600e09ca6ff.jpg',
+            'https://i.pinimg.com/236x/17/4b/44/174b446aeae98e18396b47df5706b565.jpg'
+        ];
+
+        document.getElementById('loginButton').addEventListener('click', function () {
+            closeAllPopups();
+            document.getElementById('loginPopup').style.display = 'block';
+        });
+        document.getElementById('registerButton').addEventListener('click', function () {
+            closeAllPopups();
+            document.getElementById('registerPopup').style.display = 'block';
+        });
+
+        function closeAllPopups() {
+            document.getElementById('loginPopup').style.display = 'none';
+            document.getElementById('registerPopup').style.display = 'none';
+            document.getElementById('loginError').textContent = '';
+            document.getElementById('registerError').textContent = '';
+        }
+        function closePopup(popupId) {
+            document.getElementById(popupId).style.display = 'none';
+        }
+
+        function login() {
+            if (isLoggedIn) {
+                document.getElementById('loginError').textContent = 'Вы уже вошли в аккаунт. Пожалуйста, выйдите, чтобы войти снова.';
+                return;
+            }
+
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (username.length < 2) {
+                document.getElementById('loginError').textContent = 'Никнейм должен содержать хотя бы 2 символа.';
+                return;
+            }
+
+            if (password.length < 3) {
+                document.getElementById('loginError').textContent = 'Пароль должен содержать хотя бы 3 символа.';
+                return;
+            }
+
+            isLoggedIn = true;
+            showProfileIcon(username);
+            closeAllPopups();
+        }
+
+        function register() {
+            if (isLoggedIn) {
+                document.getElementById('registerError').textContent = 'Вы уже вошли в аккаунт. Пожалуйста, выйдите, чтобы зарегистрироваться снова.';
+                return;
+            }
+
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const email = document.getElementById('registerEmail').value;
+
+            if (username.length < 2) {
+                document.getElementById('registerError').textContent = 'Никнейм должен содержать хотя бы 2 символа.';
+                return;
+            }
+
+            if (password.length < 3) {
+                document.getElementById('registerError').textContent = 'Пароль должен содержать хотя бы 3 символа.';
+                return;
+            }
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+            if (!emailPattern.test(email)) {
+                document.getElementById('registerError').textContent = 'Введите корректный адрес электронной почты.';
+                return;
+            }
+            isLoggedIn = true; 
+            showProfileIcon(username);
+            closeAllPopups();
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            closeAllPopups();
+            const profileIcon = document.getElementById('profileIcon');
+            profileIcon.style.display = 'none';
+            const navbar = document.getElementById('navbar');
+            navbar.style.display = 'none';
+            document.getElementById('message').textContent = '';
+        }
+
+        function showProfileIcon(username) {
+            const profileIcon = document.getElementById('profileIcon');
+            const profileImage = document.getElementById('profileImage');
+            profileIcon.style.display = 'block';
+            const randomIndex = Math.floor(Math.random() * profilePictures.length);
+            profileImage.src = profilePictures[randomIndex]; 
+            profileIcon.innerHTML += `<span>${username.charAt(0).toUpperCase()}</span>`;
+        }
+
+        function toggleNavbar() {
+            const navbar = document.getElementById('navbar');
+            navbar.style.display = navbar.style.display === 'block' ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
