@@ -4,7 +4,7 @@
 
 ### Открыть эту папку в VS Code;
 
-###Далее в терминале py -m venv venv;
+### Далее в терминале py -m venv venv;
 
 ### В терминале установить библиотеку Flask .\venv\Scripts\pip.exe install flask
 
